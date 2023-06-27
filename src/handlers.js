@@ -3,49 +3,61 @@ import { getKeys } from "./helpers.js"
 import { TransactionRepository } from "./repos.js"
 
 export function TgOnMessageHandler(bot) {
-    return async (body) => {  
-        try { 
-            let data = JSON.parse(body.content.toString()) 
+    return async (body) => {
+        try {
+            let data = JSON.parse(body.content.toString())
             console.log(data + " Content")
 
             console.log(`Validation return data: ${data}`)
-        
+
             // validateReturnData(content)
-        
+
             let status_code_info = STATUSCODES[data.status_code]
-            let tx_id = data.tx_id 
-        
+            let tx_id = data.tx_id
+
             let ins = TransactionRepository.getInstance()
-	        console.log(`Transaction id: ${tx_id}, Keys ${getKeys(data)}`)
+            console.log(`Transaction id: ${tx_id}, Keys ${getKeys(data)}`)
             ins.getByID(tx_id, async (err, tx) => {
-                if (err) { 
+                if (err) {
                     console.error(err)
-                    return 
+                    return
                 }
-                if (tx === null || tx === undefined) { 
+                if (tx === null || tx === undefined) {
                     console.error("Cannot pull transaction id")
-                    return 
+                    return
                 }
                 console.log("WHATAFAK")
-                ins.getUserByTransaction(tx_id, async (err, user) => {  
-                    if (err) { 
+                ins.getUserByTransaction(tx_id, async (err, user) => {
+                    if (err) {
                         console.error(err)
-                        return 
-                    } 
-                    if (user === null || user === undefined) { 
-                        console.error("Can't pull users with transaction ids;")
-                        return 
+                        return
                     }
-                    await bot.sendMessage(user.userId, `Ваша транзакция обработана, вот её результат: \n ${status_code_info}`)
-                }) 
+                    if (user === null || user === undefined) {
+                        console.error("Can't pull users with transaction ids;")
+                        return
+                    }
+                    const Keyboard = {
+                        reply_markup: {
+                            inline_keyboard: [
+                                [
+                                    {
+                                        text: "👤 Тех поддержка 👤",
+                                        callback_data: "helpAdmin"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                    await bot.sendMessage(user.userId, `✅ Ваша заявка на вывод была отработана, вот ее вывод: \n ${status_code_info}`, Keyboard)
+                })
             })
 
-            return true 
+            return true
 
-        } catch (err) { 
+        } catch (err) {
             console.error(err)
         }
-    } 
+    }
 }
 
 export async function startHandler(bot) {
@@ -76,11 +88,11 @@ export async function startHandler(bot) {
                 });
             }
         });
-    } 
+    }
 }
 
 export function addBalance(bot) {
-    return async (msg, match) => { 
+    return async (msg, match) => {
         const chatId = msg.chat.id;
         const adminUserId = msg.from.id;
         const targetUserId = parseInt(match[1]);
@@ -97,10 +109,10 @@ export function addBalance(bot) {
         } else {
             bot.sendMessage(chatId, "У вас нет прав на выполнение этой команды");
         }
-    } 
+    }
 }
 
-export function minusBalance(bot) { 
+export function minusBalance(bot) {
     return (msg, match) => {
         const chatId = msg.chat.id;
         const adminUserId = msg.from.id;
@@ -121,7 +133,7 @@ export function minusBalance(bot) {
     }
 }
 
-export function blockUserHandler(bot) { 
+export function blockUserHandler(bot) {
     return async (msg, match) => {
         const chatId = msg.chat.id;
         const adminUserId = msg.from.id;
