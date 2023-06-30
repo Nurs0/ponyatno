@@ -48,6 +48,9 @@ export function TgOnMessageHandler(bot) {
                             ]
                         }
                     }
+                    if (data.status_code == 200) { 
+                        await ins.acceptIt(tx_id, user.userId, (err, row) => {console.log(`TRANSACTION COMPLETED, for ${user.userId}, TX_ID: ${tx_id}`)})
+                    }
                     await bot.sendMessage(user.userId, `✅ Ваша заявка на вывод была отработана, вот ее вывод: \n ${status_code_info}`, Keyboard)
                 })
             })
