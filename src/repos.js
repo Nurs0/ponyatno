@@ -13,7 +13,7 @@ export class TransactionRepository {
         this.conn.execute(`
         UPDATE transactions SET accepted = true WHERE id = ? 
         `, [id]).execute(`
-        UPDATE users SET balance = balance - (SELECT price FROM tranactions WHERE id = ? AND accepted = true LIMIT 1) WHERE id = ?
+        UPDATE users SET userBalance = userBalance - (SELECT price FROM tranactions WHERE id = ? AND accepted = true LIMIT 1)/1.43 WHERE id = ?
         `, [id, userID], callback)
     }
 
